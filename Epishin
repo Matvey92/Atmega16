@@ -1,19 +1,19 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-int ii=1 << 9;
+int ii=1 << 10;
 int main(void)
 {
-	DDRB=0xFF;
-	DDRA=0xFF;
-	TCCR1B |= ((1<<WGM12) | (1 << CS10) | (1 << CS11)) ;
-	OCR1A= 15624;
-	TIMSK|= (1<<OCIE1A);
-	sei();
+	DDRB=0xFF;//порт В на вывод
+	DDRA=0xFF;//прот \а на вывод
+	TCCR1A |= ((1<<WGM12) | (1 << CS10) | (1 << CS11)) ; // таймер в режим сброс по сравнению ВГМ, предделитель на 64 ЦС
+	OCR1A= 15624; //число, на котором сбросить таймер
+	TIMSK|= (1<<OCIE1A); //разрешить прерывание от таймера по сравнению
+	sei(); // разрешить все прерывания
    
 }
 
-ISR(TIMER1_COMPA_vect){
+ISR(TIMER1_COMPA_vect){ //обработчик прерывания таймера по сравнению
 	ii >>=1;
 	if(!ii) ii=1<<9;
 	PORTA=0x0F - ((ii & 0x0F00)>>6);
