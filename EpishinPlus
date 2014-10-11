@@ -2,11 +2,13 @@
 char x,y;
 int main(void)
 {
-	DDRB = 0b11111000; DDRA = 0x0F;
-	PORTB = 1<<4;
+	DDRB = 0b11111000; DDRA = 0x0F;	
 	while(1)
 		for(x=4; x<=7; x++)
+		{
+			PORTB = 1<<x;
 			for(y=0; y<=2; y++)	
 				if(PINB &= (1<<y)) 
 					PORTA ^= (1<<y);
+		}					
 }
