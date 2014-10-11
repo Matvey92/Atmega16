@@ -6,9 +6,10 @@ int main(void)
 	while(1)
 		for(x=4; x<=7; x++)
 		{
-			PORTB = 1<<x;
+			PORTB &= 0x0F;	// reset greater bits
+			PORTB |= 1<<x;  // set one
 			for(y=0; y<=2; y++)	
-				if(PINB &= (1<<y)) 
-					PORTA ^= (1<<y);
+				if(PORTB &= (1<<y)) 
+					PORTA = (1<<x);
 		}					
 }
