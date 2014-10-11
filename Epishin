@@ -1,7 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-int ii=1 << 10;
+int ii=1 << 9;
 int main(void)
 {
 	DDRB=0xFF;
