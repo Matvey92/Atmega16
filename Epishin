@@ -1,11 +1,34 @@
 #include <avr/io.h>
+#include <util/delay.h>
+
 int main(void)
 {
-	DDRB=0b11111000;
-	while(1){
-		PORTB= 1<<4;
-		if(PINB1==1){PORTB^=(1<<3);}
+	PORTB=0xFF;
+	DDRB=0xF0;
+	PORTA=0x00;
+	DDRA=0x00;
+	unsigned char button[16];
+	unsigned char x;
+    while(1)
+    {
+        for (x = 0; x < 4; x++){   //провер€ем 4 столбца
+	        _delay_ms(6);                   //делаем задержку в 6мс
+	        switch(x){       //управление столбцами
+		        case 0: PORTB=0b00010000;  //1 столбец
+		        case 1: PORTB=0b10000000;   //2 столбец
+		        case 2: PORTB=0b01000000;  //3 столбец
+		        case 3: PORTB=0b00100000;  //4 столбец
+	        }
+	        _delay_ms (3);                  //задержка
+	        button[0+x]=PINB3;   //проверка 1 строки
+			PORTA=1;
+	        _delay_ms (3);                  //задержка
+	        button[4+x]=PINB2;   //проверка 2 строки
+	        _delay_ms (3);                  //задержка
+	        button[8+x]=PINB1;   //проверка 3 строки
+	        _delay_ms (3);                  //задержка
+	        button[12+x]=PINB0;  //проверка 4 строки
 
-	}
-	
+        }
+    }
 }
