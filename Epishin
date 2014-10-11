@@ -1,11 +1,11 @@
 #include <avr/io.h>
 int main(void)
 {
-	DDRB=0b00011111;
+	DDRB=0b11111000;
 	while(1){
-		
-		if(PINB.1==1){PORTB=1;}
-	
+		PORTB= 1<<4;
+		if(PINB1==1){PORTB^=(1<<3);}
+
 	}
-   
+	
 }
