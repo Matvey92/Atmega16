@@ -1,0 +1,23 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#define MAXIM 6
+char U[] = {0, 28, 49, 49, 28, 0};
+int i;
+
+void pregenerate_sin()
+{
+}
+
+int main(void)
+{	DDRB = 0xFF;		PORTB = 0xD2;
+	TCCR1A= (1<<WGM12);	OCR1A = 2000;
+	TIMSK|= 1<<OCIE1A;	sei();
+	while(2) {}
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+	PORTB = U[i++];
+	if(i == MAXIM) i = 0;
+}
