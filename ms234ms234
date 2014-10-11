@@ -1,16 +1,21 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 #define F_CPU 1000000
 int ii = 1 << 10;		// iterator is unary-like
 int main(void)
-{	DDRB = 0xFF;	DDRA = (1<<DDA2) | (1<<DDA3);
-	//OCR0 = 0x5;		TCCR0= (1<<CS01 | 1<<WGM01);
-	PORTB = 0xFF;	PORTA = 0x0F;
-		while(2)
-	{		_delay_ms(200);
-			ii >>= 1;								// unary-like decrement
-			if(!ii) ii = 1 << 9;					// finished? reset
-			PORTA = 0x0F - ((ii & 0x0F00) >> 6);	// abcd000000 => A 0000abcd
-			PORTB = 0xFF - ii;						// 00abcdefgh => B abcdefgh
-	}
+{	DDRA  = (1<<DDA2) | (1<<DDA3);			DDRB = 0xFF;	
+	TCCR1A= (1<<WGM12| 1<<CS11 | 1<<CS10);	OCR1A = 15624;	
+	PORTA = 0x0F;							PORTB = 0xFF;	
+	TIMSK|= 1<<OCIE1A;
+	sei();
+	while(2);
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+	ii >>= 1;								// unary-like decrement
+	if(!ii) ii = 1 << 9;					// finished? reset
+	PORTA = 0x0F - ((ii & 0x0F00) >> 6);	// abcd000000 => A 0000abcd
+	PORTB = 0xFF - ii;						// 00abcdefgh => B abcdefgh
 }
