@@ -6,7 +6,7 @@ int ii = 1 << 10;		// iterator is unary-like
 int main(void)
 {	DDRA  = (1<<DDA2) | (1<<DDA3);			DDRB = 0xFF;	
 	TCCR1A= (1<<WGM12| 1<<CS11 | 1<<CS10);	OCR1A = 15624;	
-	PORTA = 0x0F;							PORTB = 0xFF;	
+	PORTA = 0x08;							PORTB = 0xD2;	
 	TIMSK|= 1<<OCIE1A;
 	sei();
 	while(2);
