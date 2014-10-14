@@ -11,7 +11,7 @@ SIGNAL(SIG_ADC){
 	input |=(ADCH << 8);
 	// compute
 	result = (i[0]+i[1]+i[2]+i[3]+
-		 i[4]+i[5]+i[6]+input) >> 3;
+		 i[4]+i[5]+i[6]+input) >> 3; //нифига я с 4-й потупому слил -_-
 	// store
 	i[--p] = input;
 	if(!p) p=7;
