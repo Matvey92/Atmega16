@@ -1,0 +1,22 @@
+	void func20(int num[],int n){
+		int min=INT_MAX;
+		int i;
+		for (i=0; i<n; i++)
+			if ((num[i]<min) && (num[i]>0)) min=num[i];
+		for (i=0; i<n; i++)
+			if (num[i]<0) num[i]=min;
+	}
+	
+	void test20(){
+	int a[] = {1, 2, -3, 4, -5, 6, 7, 8, 9, 10};
+	int n=10, i;
+
+	for (i=0; i<n; i++)
+		cout<<a[i]<<" ";
+	cout<<"\n";
+	func20(a,n);
+
+	for (i=0; i<n; i++)
+		cout<<a[i]<<" ";
+	_getch();
+}
