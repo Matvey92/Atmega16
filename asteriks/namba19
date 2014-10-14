@@ -1,0 +1,18 @@
+uint16_t readdata=0;
+uint16_t result=0;
+unsigned int i = 0;
+
+SIGNAL(SIG_ADC){
+  readdata = 0;
+	readdata |= ADCL;
+	readdata |= (ADCH << 8);
+	result+=readdata;
+	i++;
+	if(i=9){
+		i=0;
+		return result>>4;
+	}
+}
+
+//можт и криво, я хз, но суть в том, что надо сначала проситать ADCL, потом ADCH. Именно в этом порядке. 
+//Только тогда АЦП вывалит туда новые данные. Это аппаратная фича.
