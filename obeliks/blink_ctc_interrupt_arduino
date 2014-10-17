@@ -1,0 +1,18 @@
+void setup(){
+  DDRB = 0xFF;
+  TCCR1B=0;
+  TCCR1A=0;
+  TCCR1B|= 5<<CS10;
+  TCCR1B|= 1<<WGM12;
+  OCR1A = 15624;
+  TIMSK1|= 1<<OCIE1A;
+  sei();
+}
+
+void loop(){
+  while(2);
+}
+
+ISR(TIMER1_COMPA_vect){
+  PINB|=(1<<5);
+}
