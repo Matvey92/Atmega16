@@ -1,3 +1,5 @@
+//http://nboddula.blogspot.ru/2012/11/msp430-using-usi-for-uart-i2c.html
+
 #include <msp430f2013.h>
 #include <string.h>
  
