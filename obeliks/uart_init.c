@@ -7,7 +7,7 @@
 
 #define FOSC 8000000		// частота клока
 #define BAUD 9600		//бодрейт юарта
-#define MYUBRR FOSC/16/BAUD-1	//бодрейт, который запишем в UBRR 
+#define MYUBRR (FOSC/16/BAUD-1)	//бодрейт, который запишем в UBRR 
                                 //(для 8Мгц и 9600 в даташите 51 с ошибкой 0,2 %)
 void main( void )
 {
