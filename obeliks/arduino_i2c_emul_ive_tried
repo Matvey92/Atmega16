@@ -1,0 +1,187 @@
+#define I2C_PORT_DIR DDRC
+#define I2C_PORT_PIN PINC
+#define I2C_PORT PORTC
+#define SDA_PIN PORTC4
+#define SCL_PIN PORTC5
+#define TEMP_ADDR 0x90
+#define I2C_DELAY_TIME 2
+
+uint16_t temp=0;
+unsigned char receivedData;
+  
+  
+//-----------------------------------------------//
+void setup(){
+  SCLasOutput();
+  SDAasOutput();   
+  Serial.begin(9600);
+}
+
+void loop(){
+  DS1624RegistryConfiguration();
+  DS1624ConversionStart();
+  DS1624ReadTemperature();
+  Serial.println(temp,BIN);
+  delay(800);
+}
+//-----------------------------------------------//
+
+void i2cDelay(){
+  volatile int v;
+  for (int i=0;i<80;i++){v;}
+//  delayMicroseconds(I2C_DELAY_TIME);
+//delay(250);
+}
+
+void SCLasOutput(){I2C_PORT_DIR |= (1<<SCL_PIN);}
+void SCLasInput(){I2C_PORT_DIR &= (0<<SCL_PIN);}
+void SDAasOutput(){I2C_PORT_DIR |= (1<<SDA_PIN);}
+void SDAasInput(){I2C_PORT_DIR&= (0<<SDA_PIN);}
+
+void setZeroOnSDA(){I2C_PORT &= (0<<SDA_PIN);}
+void setOneOnSDA(){I2C_PORT |= (1<<SDA_PIN);}
+void setZeroOnSCL(){I2C_PORT &= (0<<SCL_PIN);}
+void setOneOnSCL(){I2C_PORT |= (1<<SCL_PIN);}
+
+
+void generateStart(){
+  SDAasOutput();
+  setOneOnSCL();
+  setOneOnSDA();
+  i2cDelay();
+  setZeroOnSDA();
+  i2cDelay();
+}
+
+void generateStop(){
+  tock();
+  SDAasOutput();
+  setOneOnSCL();
+  i2cDelay();
+  setOneOnSDA();
+  i2cDelay();
+  i2cDelay();
+}
+
+boolean ack(){
+  setOneOnSDA();
+  SDAasInput();
+  tick();
+  tock();
+  while(I2C_PORT_PIN&(1<<SDA_PIN)){i2cDelay();};
+  tick();
+  return(1);
+}
+
+
+void sendByte(unsigned char byteToSend){
+  SDAasOutput();
+//  Serial.println(byteToSend,BIN);
+  for(int i=0;i<8;i++){
+    sendBit(byteToSend>>7);
+    byteToSend<<=1;
+  } 
+  SCLasInput();
+  while(SCLisClear());
+  while(!ack());
+}
+
+void sendBit(boolean bitToSend){
+  tick();
+ // Serial.println(bitToSend,BIN);
+  if(bitToSend) setOneOnSDA();
+  else setZeroOnSDA();
+  tock();
+}
+
+unsigned char readByte(){
+  setOneOnSDA();
+  SDAasInput();
+  
+  for(int i=0;i<8;i++){
+    receivedData<<=1;
+    receivedData|=readBit();
+  }
+}
+    
+
+boolean readBit(){
+  return (I2C_PORT_PIN & (1<<SDA_PIN));
+  //return (1);
+}
+
+boolean SCLisClear(){
+  while(!(I2C_PORT_PIN & (1<<SCL_PIN)));
+  return(1);
+}
+
+void sendAck(){
+  SDAasOutput();
+  tick();
+  setZeroOnSDA();
+  tock();
+//  tick();
+//  tock();
+ // i2cDelay();
+}
+
+void sendNack(){
+  SDAasOutput();
+  tick();
+  setOneOnSDA();
+  tock();
+//  tick();
+//  tock();
+//  i2cDelay();
+}
+
+void tick(){
+  i2cDelay();
+  setZeroOnSCL();
+  i2cDelay();
+}
+
+void tock(){
+  i2cDelay();
+  setOneOnSCL();
+  i2cDelay();
+}
+
+void DS1624RegistryConfiguration(){
+  generateStart();
+  sendByte(TEMP_ADDR);
+ // while(!ack());
+  sendByte(0xAC);
+ // while(!ack());
+  sendByte(0x00);
+//  while(!ack());
+  generateStop();
+}
+
+void DS1624ConversionStart(){
+  generateStart();
+  sendByte(TEMP_ADDR);
+ // while(!ack());
+  sendByte(0xEE);
+//  while(!ack());
+  generateStop();
+}  
+
+void DS1624ReadTemperature(){
+  temp=0;
+  generateStart();
+  sendByte(TEMP_ADDR);
+ // while(!ack());
+  sendByte(0xAA);
+ // while(!ack()); 
+  generateStart();
+  sendByte(TEMP_ADDR+0x01);  
+ // while(!ack()); 
+  readByte();
+  sendAck();
+  temp|=(receivedData<<8);
+  readByte();
+  sendNack();
+  temp|=(receivedData);
+  generateStop();
+}   
