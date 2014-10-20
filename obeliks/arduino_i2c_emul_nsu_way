@@ -1,175 +1,177 @@
 //http://www.inp.nsk.su/students/radio/2013/TSANI/Lab3.pdf
-
 #define I2C_PORT_DIR DDRC
 #define I2C_PORT_PIN PINC
 #define I2C_PORT_DATA PORTC
 #define SDA_PIN PORTC4
 #define SCL_PIN PORTC5
 #define TEMP_ADDR 0x90
-#define DELAY 25
+#define DELAY 2
 
 uint16_t temp;
 
 void setup(){
-  Serial.begin(192000);
+  Serial.begin(9600);
 }
 
 void loop(){
   DS1624RegistryConfiguration();
+    delay(100);
   DS1624ConversionStart();
+      delay(100);
   DS1624ReadTemperature();
-  Serial.println(temp);
-
+  Serial.println(temp,BIN);
+ // sendByte(0xAA);
+  delay(100);
 }
 
 void i2cDelay(){delayMicroseconds(DELAY);}
+//void i2cDelay(){delay(250);}
 
-void i2cWrite(int sda, int scl){
-	I2C_PORT_DIR |= (1<<SDA_PIN) | (1<<SCL_PIN);
-	if (sda) I2C_PORT_DATA |= (1<<SDA_PIN);
-	else I2C_PORT_DATA &= (0<<SDA_PIN);
-	if (scl) I2C_PORT_DATA |= (1<<SCL_PIN);
-	else I2C_PORT_DATA &= (0<<SCL_PIN);
+void i2cWrite(boolean sda, boolean scl){
+  I2C_PORT_DIR |= (1<<SDA_PIN) | (1<<SCL_PIN);
+  if (sda) I2C_PORT_DATA |= (1<<SDA_PIN);
+  else I2C_PORT_DATA &= (0<<SDA_PIN);
+  if (scl) I2C_PORT_DATA |= (1<<SCL_PIN);
+  else I2C_PORT_DATA &= (0<<SCL_PIN);
 }
 
 boolean currentSDA(){
-boolean readSDA;
-	I2C_PORT_DIR &= (0<<SDA_PIN);
-	readSDA = I2C_PORT_DATA &= (1<<SDA_PIN);
-	I2C_PORT_DIR |= (1<<SDA_PIN);
-	return readSDA;
+  boolean readSDA;
+  I2C_PORT_DIR &= (0<<SDA_PIN);
+  readSDA = I2C_PORT_DATA &= (1<<SDA_PIN);
+  I2C_PORT_DIR |= (1<<SDA_PIN);
+  return readSDA;
 }
 
 boolean currentSCL(){
-boolean readSCL;
-	I2C_PORT_DIR &= (0<<SDA_PIN);
-	readSCL = I2C_PORT_DATA &= (1<<SCL_PIN);
-	I2C_PORT_DIR |= (1<<SCL_PIN);
-	return readSCL;
+  boolean readSCL;
+  I2C_PORT_DIR &= (0<<SDA_PIN);
+  readSCL = I2C_PORT_DATA &= (1<<SCL_PIN);
+  I2C_PORT_DIR |= (1<<SCL_PIN);
+  return readSCL;
 }
 
-char i2cRead(int *sda, int *scl){
-	uint8_t readData;
-	*sda = currentSDA();
-	*scl = currentSCL();
-	return read;
+void i2cRead(int *sda, int *scl){
+  uint8_t readData;
+  *sda = currentSDA();
+  *scl = currentSCL();
+//  return read;
 }
 
 int sendStart(){
-	i2cWrite(1,1);
-	i2cDelay();
-	i2cWrite(0,1);
-	i2cDelay();
-	i2cWrite(0,0);
-	i2cDelay();
-	return(1);
+  i2cWrite(1,1);
+  i2cDelay();
+  i2cWrite(0,1);
+  i2cDelay();
+  i2cWrite(0,0);
+  i2cDelay();
+//  return(1);
 }
 
 int sendStop(){
-	i2cWrite(0,0);
-	i2cDelay();
-	i2cWrite(0,1);
-	i2cDelay();
-	i2cWrite(1,1);
-	i2cDelay();
-	return(1);
+  i2cWrite(0,0);
+  i2cDelay();
+  i2cWrite(0,1);
+  i2cDelay();
+  i2cWrite(1,1);
+  i2cDelay();
+  return(1);
 }
 
-
-
 char readByte(){
-	uint8_t readData, i;
-	for(i=0;i<8;i++){
-	readBit();
-		readData |= currentSDA(); //не затираются ли данные?
-		readData <<= 1;
-	}
-	return readData;
+  uint8_t readData, i;
+  for(i=0;i<8;i++){
+    
+    readData |= readBit();//currentSDA(); //не затираются ли данные?
+    readData <<= 1;
+  }
+  return readData;
 }
 
 boolean readBit(){
-	i2cWrite(1,0);
-	i2cDelay();
-	i2cWrite(currentSDA(),1); //????
-	i2cDelay();  //??????????????
-	return currentSDA(); //?????
+  i2cWrite(1,0);
+  i2cDelay();
+  i2cWrite(currentSDA(),1); //????
+  i2cDelay(); //??????????????
+  return currentSDA(); //?????
 }
 
-void sendBit(int bit){
-	i2cWrite(currentSDA(),0);
-	i2cDelay(); //надо ли?
-	i2cWrite(bit,0);
-	i2cDelay();
-	i2cWrite(currentSDA(),1);
-	i2cDelay();
-//	return(1);
+void sendBit(int bitToSend){
+  i2cWrite(currentSDA(),0);
+  i2cDelay(); //надо ли?
+  i2cWrite(bitToSend,0);
+  i2cDelay();
+  i2cWrite(currentSDA(),1);
+  i2cDelay();
+// return(1);
 }
 
-void sendByte(int byte){
-	int i,bit;
-	for(i=0;i<8;i++){
-		bit=byte&0x80;
-		byte <<= 1;
-		sendBit(bit);
-	}
-//	return(1);
+void sendByte(int byteToSend){
+  int i,bitToSend;
+  for(i=0;i<8;i++){
+    bitToSend=bitToSend&0x80;
+    byteToSend <<= 1;
+    sendBit(bitToSend);
+  }
+// return(1);
 }
 
 int acknowledge(){
-	int sda, scl;
-	sda = 0;
-	scl = 0;
-	i2cWrite(currentSDA(),0);
-	i2cWrite(1,0);	
-	i2cDelay();
-	i2cWrite(1,1);
-	i2cDelay();
-	while(sda != 0){
-		i2cRead(&scl, &sda); //
-		i2cDelay(); //переставлял!
-	}
-	return(1);
+  int sda, scl;
+  sda = 0;
+  scl = 0;
+  i2cWrite(currentSDA(),0);
+  i2cWrite(1,0);
+  i2cDelay();
+  i2cWrite(1,1);
+  i2cDelay();
+  while(sda != 0){
+    i2cDelay(); //переставлял!
+    i2cRead(&scl, &sda); //
+  }
+  return(1);
 }
 
 void sendAck(){sendBit(0);}
 void sendNack(){sendBit(1);}
 
-void sendNack(){}
-
 void DS1624RegistryConfiguration(){
-	sendStart(); 
-	sendByte(TEMP_ADDR); 
-	acknowledge(); 
-	sendByte(0xAC); 
-	acknowledge(); 
-	sendByte(0x00); 
-	acknowledge(); 
-	sendStop(); 
+  sendStart();
+  sendByte(TEMP_ADDR);
+  acknowledge();
+  sendByte(0xAC);
+
+  acknowledge();
+  sendByte(0x00);
+
+  acknowledge();
+  sendStop();
+  delay (100);
 }
 
 void DS1624ConversionStart(){
-	sendStart(); 
-	sendByte(TEMP_ADDR); 
-	acknowledge(); 
-	sendByte(0xEE); 
-	acknowledge(); 
-	sendStop(); 
-}  
+  sendStart();
+  sendByte(TEMP_ADDR);
+  acknowledge();
+  sendByte(0xEE);
+  acknowledge();
+  sendStop();
+}
 
 void DS1624ReadTemperature(){
-	temp=0;
-	sendStart(); 
-	sendByte(TEMP_ADDR);
-	acknowledge();
-	sendByte(0xAA);
-	acknowledge();
-	generateStart();
-	sendByte(TEMP_ADDR+0x01);
-	acknowledge();	
-	temp|=(readByte<<8);
-	sendAck();
-	temp|=(readByte);
-	sendNack();
-	temp|=(receivedData);
-	sendStop();
-}   
+  temp=0;
+  sendStart();
+  sendByte(TEMP_ADDR);
+  acknowledge();
+  sendByte(0xAA);
+  acknowledge();
+  sendStart();
+  sendByte(TEMP_ADDR+0x01);
+  acknowledge();
+  temp=(readByte()<<8);
+  sendAck();
+//  temp<<=temp;
+  temp|=(readByte());
+  sendNack();
+  sendStop();
+} 
