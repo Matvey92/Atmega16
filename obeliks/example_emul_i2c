@@ -1,11 +1,18 @@
 // Hardware-specific support functions that MUST be customized:
 #define I2CSPEED 100
+#define SCL_PIN 1
+#define SCL_PORT PORTB
+#define SCL_DDR DDRB
+#define SDA_PIN 0
+#define SDA_PORT PORTB
+#define SDA_DDR DDRB
+
 void I2C_delay() { volatile int v; int i; for (i=0; i < I2CSPEED/2; i++) v; }
-bool read_SCL(void); // Set SCL as input and return current level of line, 0 or 1
-bool read_SDA(void); // Set SDA as input and return current level of line, 0 or 1
-void clear_SCL(void); // Actively drive SCL signal low
-void clear_SDA(void); // Actively drive SDA signal low
-void arbitration_lost(void);
+bool read_SCL(void) { SCL_DDR &= ~(1 << SCL_PIN); return SCL_PORT & (1 << SCL_PIN); } // Set SCL as input and return current level of line, 0 or 1
+bool read_SDA(void) { SDA_DDR &= ~(1 << SDA_PIN); return SDA_PORT & (1 << SDA_PIN); } // Set SDA as input and return current level of line, 0 or 1
+void clear_SCL(void){ SCL_DDR |=  (1 << SCL_PIN); SCL_PORT &= ~(1 << SCL_PIN); } // Actively drive SCL signal low
+void clear_SDA(void){ SDA_DDR |=  (1 << SDA_PIN); SDA_PORT &= ~(1 << SDA_PIN); } // Actively drive SDA signal low
+void arbitration_lost(void); /* не знаю, что тут делать */
  
 bool started = false; // global data
 void i2c_start_cond(void) {
