@@ -1,0 +1,30 @@
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
+uint8_t pulseCounter=0;
+uint16_t currentFreq=0;
+
+int main()
+{
+	MCUCR |= (3<<ISC10); 	//внешнее прерывание произойдет на переднем фронте входа INT1
+	GICR |= (1<<INT1); 		//разрешение внешнего прерывания
+	TCCR1A |= (1<<CS11); 	//таймер сбрасывается по переполнению, делитель 8
+	TIMSK |= 1<<TOIE1; 		//разрешение прерывания от внешнего источника
+	sei();					      //глобальное разрешение прерываний
+	while(1)
+	{
+		//matrix handler
+	}
+}
+
+
+ISR(INT1_vect) //обработчик внешнего прерывания
+{
+	pulseCounter+=1; //инкрементируем счетчик импульсов
+}
+
+ISR(TIMER1_OVF_vect) //обработчик прерывания по переполнению таймера
+{
+	currentFreq=pulseCounter; //запоминаем количество импульсов
+}
